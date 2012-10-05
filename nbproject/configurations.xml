@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>md5.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -25,6 +26,8 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <itemPath>Decrypter.cpp</itemPath>
+    <itemPath>Decrypter.h</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -34,6 +37,9 @@
         <compilerSet>default</compilerSet>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <commandLine>-fpermissive</commandLine>
+        </ccTool>
       </compileType>
     </conf>
     <conf name="Release" type="1">
