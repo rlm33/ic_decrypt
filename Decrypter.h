@@ -11,7 +11,7 @@ class Decrypter {
 private:
     vector<char> dominio;
     int tam;
-    string expand(string clave, MD5 md5, string solucion, int k);
+    bool expand(string clave, MD5 md5, string &solucion, int k);
 public:
     Decrypter(vector<char> dominio);
     void setDominio(vector<char> dominio);

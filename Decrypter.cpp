@@ -22,25 +22,27 @@ string Decrypter::decrypt(string clave) {
     for (i = 0; i<this->tam; i++) {
         solucion += '0';
     }
-    return this->expand(clave,md5,solucion,0);
+    if (this->expand(clave, md5, solucion, 0)) {
+        return solucion;
+    } else {
+        return "Solucion no encontrada";
+    }
 }
 
-string Decrypter::expand(string clave, MD5 md5, string solucion, int k) {
+bool Decrypter::expand(string clave, MD5 md5, string &solucion, int k) {
     int i;
-    
     for (i = 0; i < this->dominio.size(); i++) {
-        solucion[k] = dominio[i];
-        if(k == this->tam-1)
-        {
+        solucion[k] = this->dominio[i];
+        if (k == this->tam - 1) {
             cout << solucion << endl;
             if (clave == md5.digestString(solucion.c_str())) {
-                    return solucion;
-            } 
-        }
-        else
-        {
-            return expand(clave,md5,solucion,k+1);
+                return true;
+            }
+        } else {
+            if (expand(clave, md5, solucion, k + 1)) {
+                return true;
+            }
         }
     }
-    return "";
+    return false;
 }

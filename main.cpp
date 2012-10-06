@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
     cout << "Not implemented yet." << endl;
 
     MD5 md5;
-    string cadena = "au";
+    string cadena = "alfa";
     string result_md5 = md5.digestString(cadena.c_str());
     cout << "Cadena " << cadena << " es en md5:" << endl;
     cout << result_md5 << endl;
@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
     cout << values << endl;
 
     Decrypter decrypter(dominio);
+    decrypter.setTam(cadena.length());
     string solucion = "";
     solucion = decrypter.decrypt(result_md5);
     cout << "Solucion encontrada: " << solucion << endl;
