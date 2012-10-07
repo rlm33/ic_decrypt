@@ -34,7 +34,7 @@ bool Decrypter::expand(string clave, MD5 md5, string &solucion, int k) {
     for (i = 0; i < this->dominio.size(); i++) {
         solucion[k] = this->dominio[i];
         if (k == this->tam - 1) {
-            cout << solucion << endl;
+            //cout << solucion << endl;
             if (clave == md5.digestString(solucion.c_str())) {
                 return true;
             }
