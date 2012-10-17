@@ -11,6 +11,34 @@ int main(int argc, char** argv) {
     MD5 md5;
     string cadena = "alfa";
     string result_md5;
+    bool interactivo=false, fichero=false; //opciones
+    string fichero_a_desencriptar="";
+    vector<string> cadenas_a_resolver;
+
+    for (int i = 1; i < argc; i++) {
+        if(strcmp(argv[i],"-i")==0)
+        {
+            interactivo = true;
+        }
+        else if(strcmp(argv[i],"-f")==0)
+        {
+            if(i+1<argc)
+            {
+                fichero = true;
+                fichero_a_desencriptar = argv[i+1];
+                i++;
+            }
+            else
+            {
+                cout << "Falta especificar el fichero tras -f" << endl;
+            }
+        }
+        else
+        {
+            cadenas_a_resolver.push_back(argv[i]);
+        }
+    }
+
     /*cout << "Cadena " << cadena << " es en md5:" << endl;
     cout << result_md5 << endl;
 
@@ -33,8 +61,8 @@ int main(int argc, char** argv) {
 
     string solucion;
     Decrypter decrypter(dominio);
-    for (int i = 1; i < argc; i++) {
-        cadena = argv[i];
+    for (int i = 0; i < cadenas_a_resolver.size(); i++) {
+        cadena = cadenas_a_resolver[i];
         decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
