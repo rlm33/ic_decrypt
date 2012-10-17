@@ -1,48 +1,22 @@
 #include <iostream>
+#include <stdlib.h>
 #include "md5.h"
 #include "Decrypter.h"
 
 using namespace std;
 
-/*
- * 
- */
-int main(int argc, char** argv) {
+string encrypt(string cadena) {
+    string ret = "";
     MD5 md5;
-    string cadena = "alfa";
-    string result_md5;
-    bool interactivo=false, fichero=false; //opciones
-    string fichero_a_desencriptar="";
-    vector<string> cadenas_a_resolver;
 
-    for (int i = 1; i < argc; i++) {
-        if(strcmp(argv[i],"-i")==0)
-        {
-            interactivo = true;
-        }
-        else if(strcmp(argv[i],"-f")==0)
-        {
-            if(i+1<argc)
-            {
-                fichero = true;
-                fichero_a_desencriptar = argv[i+1];
-                i++;
-            }
-            else
-            {
-                cout << "Falta especificar el fichero tras -f" << endl;
-            }
-        }
-        else
-        {
-            cadenas_a_resolver.push_back(argv[i]);
-        }
-    }
+    ret = md5.digestString(cadena.c_str());
 
-    /*cout << "Cadena " << cadena << " es en md5:" << endl;
-    cout << result_md5 << endl;
+    return ret;
+}
 
-    cout << "Probando decrypter..." << endl;*/
+string decrypt(string result_md5, int tam = 4) {
+    string ret = "";
+    //Recoger dominio (minúsculas):
     vector<char> dominio;
     char a = 'a';
     char z = 'z';
@@ -51,15 +25,44 @@ int main(int argc, char** argv) {
         a++;
     }
     dominio.push_back(z);
-    /*cout << "Dominio size: " << dominio.size() << endl;
-    cout << "Dominio values: ";
-    string values = "";
-    for (int i = 0; i < dominio.size(); i++) {
-        values += dominio[i];
-    }
-    cout << values << endl;*/
+    Decrypter decrypter(dominio);
+    decrypter.setTam(tam);
+    ret = decrypter.decrypt(result_md5);
 
-    string solucion;
+    return ret;
+}
+
+void interactivo() {
+    string menu = "1- Encrypt\n2- Decrypt\n99- Salir";
+    string cadena = "";
+    int opcion = 0;
+    while (opcion != 99) {
+        cout << menu << endl;
+        getline(cin, cadena);
+        opcion = atoi(cadena.c_str());
+        switch (opcion) {
+            case 1:
+                cout << "Cadena a encriptar: ";
+                getline(cin, cadena);
+                cout << "Encriptacion MD5 = " << encrypt(cadena) << endl;
+                break;
+            case 2:
+                cout << "Cadena MD5 a desencriptar: "; //TODO: Especificar tamaño de cadena original.
+                getline(cin, cadena);
+                cout << "Cadena original = " << decrypt(cadena) << endl;
+                break;
+            case 99:
+                cout << endl << "Bye bye..." << endl << endl;
+                break;
+            default:
+                cout << "Opcion no soportada." << endl;
+        }
+    }
+}
+
+void resolver_cadenas(vector<string> cadenas_a_resolver, vector<char> dominio) {
+    MD5 md5;
+    string cadena, result_md5, solucion;
     Decrypter decrypter(dominio);
     for (int i = 0; i < cadenas_a_resolver.size(); i++) {
         cadena = cadenas_a_resolver[i];
@@ -74,6 +77,48 @@ int main(int argc, char** argv) {
             cout << " FAIL!" << endl;
         }
     }
+}
+
+/*
+ * 
+ */
+int main(int argc, char** argv) {
+    bool modo_interactivo = false, modo_fichero = false; //opciones
+    string fichero_a_desencriptar = "";
+    vector<string> cadenas_a_resolver;
+    //Procesar opciones:
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-i") == 0) {
+            modo_interactivo = true;
+        } else if (strcmp(argv[i], "-f") == 0) {
+            if (i + 1 < argc) {
+                modo_fichero = true;
+                fichero_a_desencriptar = argv[i + 1];
+                i++;
+            } else {
+                cout << "Falta especificar el fichero tras -f" << endl;
+            }
+        } else {
+            cadenas_a_resolver.push_back(argv[i]);
+        }
+    }
+    if (modo_interactivo) {
+        interactivo();
+    } else if (modo_fichero) {
+        cout << "TODO: FICHERO" << endl;
+    } else {
+        //Recoger dominio (minúsculas):
+        vector<char> dominio;
+        char a = 'a';
+        char z = 'z';
+        while (a < z) {
+            dominio.push_back(a);
+            a++;
+        }
+        dominio.push_back(z);
+        resolver_cadenas(cadenas_a_resolver, dominio);
+    }
+
     return 0;
 }
 
