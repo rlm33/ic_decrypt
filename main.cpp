@@ -104,9 +104,10 @@ void interactivo() {
     }
 }
 
-void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
+vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
     MD5 md5;
     string cadena, result_md5, solucion;
+    vector <string> resueltas;
     Decrypter decrypter(dominio);
     for (int i = 0; i < cadenas_a_resolver.size(); i++) {
         cadena = cadenas_a_resolver[i];
@@ -122,12 +123,15 @@ void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
         {
             cout << "Solucion encontrada: " << solucion;
             if (solucion == cadena) {
+                resueltas.push_back(cadena);
                 cout << " OK." << endl;
             } else {
                 cout << " FAIL!" << endl;
             }
         }
     }
+    
+    return resueltas;
 }
 
 /*
@@ -165,8 +169,10 @@ int main(int argc, char** argv) {
     if (modo_interactivo) {
         interactivo();
     } else if (modo_fichero) {
+        vector <string> resueltas;
         cadenas_a_resolver = leerFichero(fichero_a_desencriptar);
-        
+        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo);
+        escribirFichero(fichero_a_desencriptar + ".sal", resueltas);        
     } else {
         resolver_cadenas(cadenas_a_resolver, dominio_activo);
     }
