@@ -14,11 +14,11 @@ string encrypt(string cadena) {
     return ret;
 }
 
-string decrypt(string result_md5, int tam = 4) {
+string decrypt(string result_md5, string dom = "DOWNCASE", int tam = 8) {
     string ret = "";
-    Decrypter decrypter("DOWNCASE");
-    decrypter.setTam(tam);
-    ret = decrypter.decrypt(result_md5);
+    Decrypter decrypter(dom);
+    //decrypter.setTam(tam);
+    ret = decrypter.decrypt(result_md5,tam);
 
     return ret;
 }
@@ -57,15 +57,22 @@ void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
     Decrypter decrypter(dominio);
     for (int i = 0; i < cadenas_a_resolver.size(); i++) {
         cadena = cadenas_a_resolver[i];
-        decrypter.setTam(cadena.length());
+        //decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
-        solucion = decrypter.decrypt(result_md5);
-        cout << "Solucion encontrada: " << solucion;
-        if (solucion == cadena) {
-            cout << " OK." << endl;
-        } else {
-            cout << " FAIL!" << endl;
+        solucion = decrypter.decrypt(result_md5,cadena.length());
+        if(solucion == "Solucion no encontrada")
+        {
+            cout << solucion << " para cadena " << cadena << endl;
+        }
+        else
+        {
+            cout << "Solucion encontrada: " << solucion;
+            if (solucion == cadena) {
+                cout << " OK." << endl;
+            } else {
+                cout << " FAIL!" << endl;
+            }
         }
     }
 }
@@ -76,6 +83,7 @@ void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
 int main(int argc, char** argv) {
     bool modo_interactivo = false, modo_fichero = false; //opciones
     string fichero_a_desencriptar = "";
+    string dominio_activo = "DOWNCASE";
     vector<string> cadenas_a_resolver;
     //Procesar opciones:
     for (int i = 1; i < argc; i++) {
@@ -89,7 +97,15 @@ int main(int argc, char** argv) {
             } else {
                 cout << "Falta especificar el fichero tras -f" << endl;
             }
-        } else {
+        } else if (strcmp(argv[i], "-d") == 0) {
+            if (i + 1 < argc) {
+                dominio_activo = argv[i + 1];
+                i++;
+            } else {
+                cout << "Falta especificar el tipo de dominio tras -d" << endl;
+            }
+        } 
+        else {
             cadenas_a_resolver.push_back(argv[i]);
         }
     }
@@ -98,7 +114,7 @@ int main(int argc, char** argv) {
     } else if (modo_fichero) {
         cout << "TODO: FICHERO" << endl;
     } else {
-        resolver_cadenas(cadenas_a_resolver, "DOWNCASE");
+        resolver_cadenas(cadenas_a_resolver, dominio_activo);
     }
 
     return 0;
