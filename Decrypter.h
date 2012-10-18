@@ -31,6 +31,7 @@ public:
     //Helpers para construir los dominios.
     vector<char> build_downcase();
     vector<char> build_alphanumeric();
+    vector<char> build_complete();
     //Método de desencriptación MD5 por fuerza bruta.
     //Sus parámetros son:
     //clave -> cadena MD5 a desencriptar
