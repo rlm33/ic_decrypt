@@ -1,0 +1,17 @@
+[raito@raito ic_decrypt]$ ruby benchmark.rb 
+       user     system      total        real
+DOWNCASE:
+ Solucion encontrada: alfa OK.
+Solucion encontrada: beta OK.
+Solucion encontrada: gamma OK.
+  0.000000   0.000000  35.140000 ( 35.586611)
+ALPHANUMERIC
+ Solucion encontrada: alf4 OK.
+Solucion encontrada: b3ta OK.
+Solucion encontrada: gaMMa OK.
+  0.000000   0.000000 1095.710000 (1109.143154)
+COMPLETE
+ Solucion encontrada: a:@~ OK.
+  0.000000   0.000000 705.050000 (713.361973)
+[raito@raito ic_decrypt]$ 
+
