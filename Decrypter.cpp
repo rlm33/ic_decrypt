@@ -11,13 +11,27 @@ vector<char> Decrypter::build_downcase() {
         a++;
     }
     dom.push_back(z);
-    
+
     return dom;
 }
 
 vector<char> Decrypter::build_alphanumeric() {
-    vector<char> dom;
-    
+    vector<char> dom = build_downcase();
+    char A = 'A';
+    char Z = 'Z';
+    while (A < Z) {
+        dom.push_back(A);
+        A++;
+    }
+    dom.push_back(Z);
+    char cero = '0';
+    char nueve = '9';
+    while (cero < nueve) {
+        dom.push_back(cero);
+        cero++;
+    }
+    dom.push_back(nueve);
+
     return dom;
 }
 
@@ -27,16 +41,17 @@ Decrypter::Decrypter() {
 }
 
 Decrypter::Decrypter(string tipo_dominio) {
-    if(tipo_dominio=="downcase" || tipo_dominio=="DOWNCASE")
-    {
+    if (tipo_dominio == "downcase" || tipo_dominio == "DOWNCASE") {
         this->dominio = build_downcase();
-    }
-    else
-    {
+    } else if (tipo_dominio == "alphanumeric" || tipo_dominio == "ALPHANUMERIC") {
+        this->dominio = build_alphanumeric();
+    } else if (tipo_dominio == "complete" || tipo_dominio == "COMPLETE") {
+        //this->domino = build_complete();
+    } else {
         cout << "Fallo al especificar dominio. Tomando minusculas por defecto." << endl;
         this->dominio = build_downcase();
     }
-    
+
     this->tam = 4;
 }
 
