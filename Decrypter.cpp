@@ -35,6 +35,20 @@ vector<char> Decrypter::build_alphanumeric() {
     return dom;
 }
 
+vector<char> Decrypter::build_complete() {
+    vector<char> dom;
+    char first_ascii = ' '; //Decimal = 32.
+    char last_ascii = '~'; //Decimal = 126.
+    while(first_ascii < last_ascii)
+    {
+        dom.push_back(first_ascii);
+        first_ascii++;
+    }
+    dom.push_back(last_ascii);
+    
+    return dom;
+}
+
 Decrypter::Decrypter() {
     this->dominio = build_downcase();
     this->tam = 4;
@@ -46,7 +60,7 @@ Decrypter::Decrypter(string tipo_dominio) {
     } else if (tipo_dominio == "alphanumeric" || tipo_dominio == "ALPHANUMERIC") {
         this->dominio = build_alphanumeric();
     } else if (tipo_dominio == "complete" || tipo_dominio == "COMPLETE") {
-        //this->domino = build_complete();
+        this->dominio = build_complete();
     } else {
         cout << "Fallo al especificar dominio. Tomando minusculas por defecto." << endl;
         this->dominio = build_downcase();
