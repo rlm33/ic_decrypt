@@ -10,8 +10,9 @@
 *.lai
 *.la
 *.a
+*.mk
+*.bash
+*.xml
 /dist/
 /build/
 
-*.mk
-*.xml
