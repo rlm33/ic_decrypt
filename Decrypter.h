@@ -17,10 +17,20 @@ private:
     //Devuelve true si encuentra solución y false en caso contrario.
     bool expand(string clave, MD5 md5, string &solucion, int k);
 public:
+    //Constructor por defecto, dominio = minúsculas y tam = 4
+    Decrypter();
+    //Constructor con opciones para el dominio. Son:
+    //"downcase" para minúsculas.
+    //"alphanumeric" para letras y números.
+    //"complete" incluye todo caracter ascii.
+    Decrypter(string tipo_dominio);
     //Constructor para un dominio conocido.
     Decrypter(vector<char> dominio);
     void setDominio(vector<char> dominio);
     void setTam(int tam);
+    //Helpers para construir los dominios.
+    vector<char> build_downcase();
+    vector<char> build_alphanumeric();
     //Método de desencriptación MD5 por fuerza bruta.
     //Sus parámetros son:
     //clave -> cadena MD5 a desencriptar

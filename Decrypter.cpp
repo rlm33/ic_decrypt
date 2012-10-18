@@ -2,9 +2,47 @@
 #include <iostream>
 using namespace std;
 
+vector<char> Decrypter::build_downcase() {
+    vector<char> dom;
+    char a = 'a';
+    char z = 'z';
+    while (a < z) {
+        dom.push_back(a);
+        a++;
+    }
+    dom.push_back(z);
+    
+    return dom;
+}
+
+vector<char> Decrypter::build_alphanumeric() {
+    vector<char> dom;
+    
+    return dom;
+}
+
+Decrypter::Decrypter() {
+    this->dominio = build_downcase();
+    this->tam = 4;
+}
+
+Decrypter::Decrypter(string tipo_dominio) {
+    if(tipo_dominio=="downcase" || tipo_dominio=="DOWNCASE")
+    {
+        this->dominio = build_downcase();
+    }
+    else
+    {
+        cout << "Fallo al especificar dominio. Tomando minusculas por defecto." << endl;
+        this->dominio = build_downcase();
+    }
+    
+    this->tam = 4;
+}
+
 Decrypter::Decrypter(vector<char> dominio) {
     this->dominio = dominio;
-    this->tam = 2;
+    this->tam = 4;
 }
 
 void Decrypter::setDominio(vector<char> dominio) {
@@ -38,7 +76,7 @@ string Decrypter::decrypt(string clave, int tam_original) {
     } else {
         //Si conocemos el tamaño de la cadena original,
         //buscamos directamente la cadena de ese tamaño.
-        this->tam = tam_original; 
+        this->tam = tam_original;
         for (i = 0; i<this->tam; i++) {
             solucion += '0';
         }

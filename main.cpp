@@ -16,16 +16,7 @@ string encrypt(string cadena) {
 
 string decrypt(string result_md5, int tam = 4) {
     string ret = "";
-    //Recoger dominio (minúsculas):
-    vector<char> dominio;
-    char a = 'a';
-    char z = 'z';
-    while (a < z) {
-        dominio.push_back(a);
-        a++;
-    }
-    dominio.push_back(z);
-    Decrypter decrypter(dominio);
+    Decrypter decrypter("DOWNCASE");
     decrypter.setTam(tam);
     ret = decrypter.decrypt(result_md5);
 
@@ -60,7 +51,7 @@ void interactivo() {
     }
 }
 
-void resolver_cadenas(vector<string> cadenas_a_resolver, vector<char> dominio) {
+void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
     MD5 md5;
     string cadena, result_md5, solucion;
     Decrypter decrypter(dominio);
@@ -107,16 +98,7 @@ int main(int argc, char** argv) {
     } else if (modo_fichero) {
         cout << "TODO: FICHERO" << endl;
     } else {
-        //Recoger dominio (minúsculas):
-        vector<char> dominio;
-        char a = 'a';
-        char z = 'z';
-        while (a < z) {
-            dominio.push_back(a);
-            a++;
-        }
-        dominio.push_back(z);
-        resolver_cadenas(cadenas_a_resolver, dominio);
+        resolver_cadenas(cadenas_a_resolver, "DOWNCASE");
     }
 
     return 0;
