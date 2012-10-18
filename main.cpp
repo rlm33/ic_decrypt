@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include <vector>
 #include "md5.h"
 #include "Decrypter.h"
 
@@ -21,6 +22,58 @@ string decrypt(string result_md5, string dom = "DOWNCASE", int tam = 8) {
     ret = decrypter.decrypt(result_md5,tam);
 
     return ret;
+}
+
+//funcion para leer fichero de texto
+
+vector <string> leerFichero(string fichero) {
+
+    fstream ficheroe;
+    string nombrefichero = fichero;
+    string linea_aux = "";
+    vector <string> cadenas;
+    char nomfichero[nombrefichero.length() - 1];
+
+    strcpy(nomfichero, nombrefichero.c_str());
+    ficheroe.open(nomfichero, ios::in);
+
+    if (ficheroe.is_open()) {
+
+        getline(ficheroe, linea_aux);
+        cadenas.push_back(linea_aux);
+
+        while (!ficheroe.eof() && linea_aux.length() != 0) {
+            getline(ficheroe, linea_aux);
+            cadenas.push_back(linea_aux);
+        }
+        ficheroe.close();
+    } else
+        cout << "Error de apertura de fichero de lectura." << endl;
+
+    return cadenas;
+
+}
+
+//funcion para escribir fichero de texto
+
+void escribirFichero(string fichero, vector <string> cadenas) {
+
+    fstream ficheroe;
+    string nombrefichero = fichero;
+
+    char nomfichero[nombrefichero.length() - 1];
+
+    strcpy(nomfichero, nombrefichero.c_str());
+    ficheroe.open(nomfichero, ios::out);
+
+    if (ficheroe.is_open()) {
+        while (!cadenas.empty()) {
+            ficheroe << cadenas.front(); //escribo y borro elemento
+            cadenas.erase(cadenas.front());
+        }
+        ficheroe.close();
+    } else
+        cout << "Error de apertura de fichero de escritura." << endl;
 }
 
 void interactivo() {
@@ -51,9 +104,10 @@ void interactivo() {
     }
 }
 
-void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
+vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
     MD5 md5;
     string cadena, result_md5, solucion;
+    vector <string> resueltas;
     Decrypter decrypter(dominio);
     for (int i = 0; i < cadenas_a_resolver.size(); i++) {
         cadena = cadenas_a_resolver[i];
@@ -69,12 +123,15 @@ void resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
         {
             cout << "Solucion encontrada: " << solucion;
             if (solucion == cadena) {
+                resueltas.push_back(cadena);
                 cout << " OK." << endl;
             } else {
                 cout << " FAIL!" << endl;
             }
         }
     }
+    
+    return resueltas;
 }
 
 /*
@@ -112,7 +169,10 @@ int main(int argc, char** argv) {
     if (modo_interactivo) {
         interactivo();
     } else if (modo_fichero) {
-        cout << "TODO: FICHERO" << endl;
+        vector <string> resueltas;
+        cadenas_a_resolver = leerFichero(fichero_a_desencriptar);
+        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo);
+        escribirFichero(fichero_a_desencriptar + ".sal", resueltas);        
     } else {
         resolver_cadenas(cadenas_a_resolver, dominio_activo);
     }
