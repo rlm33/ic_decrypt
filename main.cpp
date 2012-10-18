@@ -3,18 +3,21 @@
 #include <vector>
 #include "md5.h"
 #include "Decrypter.h"
+#include "fstream"
 
 using namespace std;
 
+//funcion de encriptaicon md5
 string encrypt(string cadena) {
     string ret = "";
     MD5 md5;
 
-    ret = md5.digestString(cadena.c_str());
+    ret = md5.digestString(cadena.c_str());     //encriptacion md5
 
     return ret;
 }
 
+//funcion de desencriptacion md5
 string decrypt(string result_md5, string dom = "DOWNCASE", int tam = 8) {
     string ret = "";
     Decrypter decrypter(dom);
@@ -25,7 +28,6 @@ string decrypt(string result_md5, string dom = "DOWNCASE", int tam = 8) {
 }
 
 //funcion para leer fichero de texto
-
 vector <string> leerFichero(string fichero) {
 
     fstream ficheroe;
@@ -55,11 +57,11 @@ vector <string> leerFichero(string fichero) {
 }
 
 //funcion para escribir fichero de texto
-
 void escribirFichero(string fichero, vector <string> cadenas) {
 
     fstream ficheroe;
     string nombrefichero = fichero;
+    int i=0;
 
     char nomfichero[nombrefichero.length() - 1];
 
@@ -67,15 +69,16 @@ void escribirFichero(string fichero, vector <string> cadenas) {
     ficheroe.open(nomfichero, ios::out);
 
     if (ficheroe.is_open()) {
-        while (!cadenas.empty()) {
-            ficheroe << cadenas.front(); //escribo y borro elemento
-            cadenas.erase(cadenas.front());
+        while (i<cadenas.size()) {
+            ficheroe << cadenas[i] << endl; //escribo y borro elemento
+            i++;
         }
         ficheroe.close();
     } else
         cout << "Error de apertura de fichero de escritura." << endl;
 }
 
+//funcion para modo interactivo
 void interactivo() {
     string menu = "1- Encrypt\n2- Decrypt\n99- Salir";
     string cadena = "";
@@ -104,6 +107,7 @@ void interactivo() {
     }
 }
 
+//funcion para resolver las cadenas en md5
 vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
     MD5 md5;
     string cadena, result_md5, solucion;
@@ -123,7 +127,7 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
         {
             cout << "Solucion encontrada: " << solucion;
             if (solucion == cadena) {
-                resueltas.push_back(cadena);
+                resueltas.push_back("cadena encriptada: " + result_md5 + " cadena original: " + solucion);
                 cout << " OK." << endl;
             } else {
                 cout << " FAIL!" << endl;
@@ -135,18 +139,19 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
 }
 
 /*
- * 
+ * cuerpo principal
  */
 int main(int argc, char** argv) {
     bool modo_interactivo = false, modo_fichero = false; //opciones
     string fichero_a_desencriptar = "";
     string dominio_activo = "DOWNCASE";
     vector<string> cadenas_a_resolver;
+    
     //Procesar opciones:
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-i") == 0) {
             modo_interactivo = true;
-        } else if (strcmp(argv[i], "-f") == 0) {
+        } else if (strcmp(argv[i], "-f") == 0) {        //seleccion de modo fichero
             if (i + 1 < argc) {
                 modo_fichero = true;
                 fichero_a_desencriptar = argv[i + 1];
@@ -154,7 +159,7 @@ int main(int argc, char** argv) {
             } else {
                 cout << "Falta especificar el fichero tras -f" << endl;
             }
-        } else if (strcmp(argv[i], "-d") == 0) {
+        } else if (strcmp(argv[i], "-d") == 0) {        //seleccion de modo activo
             if (i + 1 < argc) {
                 dominio_activo = argv[i + 1];
                 i++;
@@ -166,9 +171,9 @@ int main(int argc, char** argv) {
             cadenas_a_resolver.push_back(argv[i]);
         }
     }
-    if (modo_interactivo) {
+    if (modo_interactivo) {     //modo interactivo
         interactivo();
-    } else if (modo_fichero) {
+    } else if (modo_fichero) {  //ejecucion de mdo fichero
         vector <string> resueltas;
         cadenas_a_resolver = leerFichero(fichero_a_desencriptar);
         resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo);
