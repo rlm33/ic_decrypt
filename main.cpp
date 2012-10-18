@@ -47,7 +47,7 @@ void interactivo() {
                 cout << "Encriptacion MD5 = " << encrypt(cadena) << endl;
                 break;
             case 2:
-                cout << "Cadena MD5 a desencriptar: "; //TODO: Especificar tamaño de cadena original.
+                cout << "Cadena MD5 a desencriptar: ";
                 getline(cin, cadena);
                 cout << "Cadena original = " << decrypt(cadena) << endl;
                 break;
