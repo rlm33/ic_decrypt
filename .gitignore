@@ -12,3 +12,6 @@
 *.a
 /dist/
 /build/
+
+*.mk
+*.xml
