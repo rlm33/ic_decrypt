@@ -4,6 +4,8 @@
 #include "md5.h"
 #include "Decrypter.h"
 #include "fstream"
+#include <omp.h>
+
 
 using namespace std;
 

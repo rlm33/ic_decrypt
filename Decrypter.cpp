@@ -82,7 +82,7 @@ void Decrypter::setTam(int tam) {
     this->tam = tam;
 }
 
-string Decrypter::decrypt(string clave, int tam_original) {
+string Decrypter::decrypt(string clave, int tam_original, bool parallel) {
     MD5 md5;
     string solucion = "";
     int i, j;
@@ -94,10 +94,19 @@ string Decrypter::decrypt(string clave, int tam_original) {
             for (i = 0; i<this->tam; i++) {
                 solucion += '0'; //Inicializamos la cadena solución a 'tam' ceros.
             }
-            if (this->expand(clave, md5, solucion, 0)) {
-                return solucion;
-            } else {
-                solucion = "";
+            if(parallel){
+                if (this->expand_parallel(clave, md5, solucion, 0)) {
+                    return solucion;
+                } else {
+                    solucion = "";
+                }
+            }
+            else{
+                if (this->expand(clave, md5, solucion, 0)) {
+                    return solucion;
+                } else {
+                    solucion = "";
+                }
             }
         }
         return "Solucion no encontrada";
@@ -109,11 +118,20 @@ string Decrypter::decrypt(string clave, int tam_original) {
         for (i = 0; i<this->tam; i++) {
             solucion += '0';
         }
-        if (this->expand(clave, md5, solucion, 0)) {
-            return solucion;
-        } else {
-            return "Solucion no encontrada";
-        }
+        if(parallel){
+                if (this->expand_parallel(clave, md5, solucion, 0)) {
+                    return solucion;
+                } else {
+                    return "Solucion no encontrada";
+                }
+            }
+            else{
+                if (this->expand(clave, md5, solucion, 0)) {
+                    return solucion;
+                } else {
+                    return "Solucion no encontrada";
+                }
+            }
     }
 }
 
@@ -136,6 +154,38 @@ bool Decrypter::expand(string clave, MD5 md5, string &solucion, int k) {
             }
         }
     }
+    //Ninguna solución encontrada para este dominio y este tamaño de cadena.
+    return false;
+}
+
+bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k) {
+    int i;
+    int chunk;
+    int nthreads = omp_get_num_threads();
+    chunk = dominio.size()/nthreads;
+    
+     
+        #pragma omp parallel shared(chunk) private(i){
+        #pragma omp for schedule(dynamic,chunk) //Para cada caracter del dominio.
+        for (i = 0; i < this->dominio.size(); i++) {
+            solucion[k] = this->dominio[i];
+            //Si ya es el último caracter de la cadena.
+            if (k == this->tam - 1) {
+                //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
+                //Solución correcta comparada con su encriptación MD5.
+                if (clave == md5.digestString(solucion.c_str())) {
+                    return true;
+                }
+            } else {
+                //Llamada recursiva para la siguiente posición de la cadena.
+                if (expand(clave, md5, solucion, k + 1)) {
+                    return true;
+                }
+            }
+        }
+        }
+
+        
     //Ninguna solución encontrada para este dominio y este tamaño de cadena.
     return false;
 }
