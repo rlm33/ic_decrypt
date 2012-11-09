@@ -14,6 +14,8 @@ private:
     vector<char> dominio;
     //El tamaño de la cadena original.
     int tam;
+    //La sucia
+    bool continue_parallel;
     //Método para llamada recursiva de 'decrypt'.
     //Devuelve true si encuentra solución y false en caso contrario.
     bool expand(string clave, MD5 md5, string &solucion, int k);

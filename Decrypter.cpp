@@ -86,6 +86,8 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel) {
     MD5 md5;
     string solucion = "";
     int i, j;
+    this->continue_parallel = true;
+    
     //Por defecto, tam_original es menor que 0, por lo que realizamos todas las cadenas
     //desde tamaño 1 hasta 8 caracteres.
     if (tam_original <= 0) {
@@ -95,11 +97,9 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel) {
                 solucion += '0'; //Inicializamos la cadena solución a 'tam' ceros.
             }
             if(parallel){
-                if (this->expand_parallel(clave, md5, solucion, 0)) {
+                this->expand_parallel(clave, md5, solucion, 0);
                     return solucion;
-                } else {
-                    solucion = "";
-                }
+              
             }
             else{
                 if (this->expand(clave, md5, solucion, 0)) {
@@ -119,11 +119,9 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel) {
             solucion += '0';
         }
         if(parallel){
-                if (this->expand_parallel(clave, md5, solucion, 0)) {
+                this->expand_parallel(clave, md5, solucion, 0);
                     return solucion;
-                } else {
-                    return "Solucion no encontrada";
-                }
+                
             }
             else{
                 if (this->expand(clave, md5, solucion, 0)) {
@@ -138,11 +136,11 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel) {
 bool Decrypter::expand(string clave, MD5 md5, string &solucion, int k) {
     int i;
     //Para cada caracter del dominio.
-    for (i = 0; i < this->dominio.size(); i++) {
+    for (i = 0; i < this->dominio.size() && this->continue_parallel; i++) {
         solucion[k] = this->dominio[i];
         //Si ya es el último caracter de la cadena.
         if (k == this->tam - 1) {
-            //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
+            cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
             //Solución correcta comparada con su encriptación MD5.
             if (clave == md5.digestString(solucion.c_str())) {
                 return true;
@@ -159,33 +157,46 @@ bool Decrypter::expand(string clave, MD5 md5, string &solucion, int k) {
 }
 
 bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k) {
-    int i;
+    int i,j;
     int chunk;
-    int nthreads = omp_get_num_threads();
+    int nthreads = 2;
     chunk = dominio.size()/nthreads;
     bool encontrada = false;
-    string solucionReal = "";
+    string solucionReal = "Solucion no encontrada";
+    string aux = "";
+    
+    cout << "tenemos " << nthreads << " threads, a " << chunk << " letras cada uno" << endl;
     
      
-        #pragma omp parallel for shared(chunk,encontrada) private(i) schedule(dynamic,chunk)
+        #pragma omp parallel for shared(chunk) private(i,j,aux) schedule(dynamic,chunk)
                 for (i = 0; i < this->dominio.size(); i++) {
-                    solucion[k] = this->dominio[i];
+                    aux = "";
+                    for (j = 0; j<this->tam && aux.length()<this->tam; j++) {
+                        aux += '0'; //Inicializamos la cadena solución a 'tam' ceros.
+                    }
+                    aux[k] = this->dominio[i];
                     //Si ya es el último caracter de la cadena.
                     if (k == this->tam - 1) {
-                        //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
+                        cout << aux << endl; //Mostrar solución intermedia (DEBUG).
                         //Solución correcta comparada con su encriptación MD5.
-                        if (clave == md5.digestString(solucion.c_str())) {
+                        if (clave == md5.digestString(aux.c_str())) {
                             encontrada = true;
-                            solucionReal = solucion;
+                            solucionReal = aux;
+                            this->continue_parallel = false;
+                            i = this->tam;
                         }
                     } else {
                         //Llamada recursiva para la siguiente posición de la cadena.
-                        if (expand(clave, md5, solucion, k + 1)) {
+                        if (expand(clave, md5, aux, k + 1)) {
                             encontrada = true;
-                            solucionReal = solucion;
+                            solucionReal = aux;
+                            this->continue_parallel = false;
+                            i = this->tam;
                         }
                     }
                 }
+    
+    cout << "el booleano es " << encontrada << endl;
     
     
         
