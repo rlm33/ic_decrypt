@@ -163,29 +163,34 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k) 
     int chunk;
     int nthreads = omp_get_num_threads();
     chunk = dominio.size()/nthreads;
+    bool encontrada = false;
+    string solucionReal = "";
     
      
-        #pragma omp parallel shared(chunk) private(i){
-        #pragma omp for schedule(dynamic,chunk) //Para cada caracter del dominio.
-        for (i = 0; i < this->dominio.size(); i++) {
-            solucion[k] = this->dominio[i];
-            //Si ya es el último caracter de la cadena.
-            if (k == this->tam - 1) {
-                //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
-                //Solución correcta comparada con su encriptación MD5.
-                if (clave == md5.digestString(solucion.c_str())) {
-                    return true;
+        #pragma omp parallel for shared(chunk,encontrada) private(i) schedule(dynamic,chunk)
+                for (i = 0; i < this->dominio.size(); i++) {
+                    solucion[k] = this->dominio[i];
+                    //Si ya es el último caracter de la cadena.
+                    if (k == this->tam - 1) {
+                        //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
+                        //Solución correcta comparada con su encriptación MD5.
+                        if (clave == md5.digestString(solucion.c_str())) {
+                            encontrada = true;
+                            solucionReal = solucion;
+                        }
+                    } else {
+                        //Llamada recursiva para la siguiente posición de la cadena.
+                        if (expand(clave, md5, solucion, k + 1)) {
+                            encontrada = true;
+                            solucionReal = solucion;
+                        }
+                    }
                 }
-            } else {
-                //Llamada recursiva para la siguiente posición de la cadena.
-                if (expand(clave, md5, solucion, k + 1)) {
-                    return true;
-                }
-            }
-        }
-        }
-
+    
+    
         
+
+    solucion = solucionReal;
     //Ninguna solución encontrada para este dominio y este tamaño de cadena.
-    return false;
+    return encontrada;
 }

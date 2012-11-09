@@ -4,7 +4,7 @@
 #include "md5.h"
 #include "Decrypter.h"
 #include "fstream"
-#include <omp.h>
+
 
 
 using namespace std;
@@ -120,7 +120,7 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
         //decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
-        solucion = decrypter.decrypt(result_md5,cadena.length());
+        solucion = decrypter.decrypt(result_md5,cadena.length(),false);  //booleano para usar paralelismo
         if(solucion == "Solucion no encontrada")
         {
             cout << solucion << " para cadena " << cadena << endl;
