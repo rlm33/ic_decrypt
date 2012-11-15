@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
     } else if (modo_fichero) { //ejecucion de modo fichero
         vector <string> resueltas;
         cadenas_a_resolver = leerFichero(fichero_a_desencriptar);
-        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo);
+        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo, nthreads);
         escribirFichero(fichero_a_desencriptar + ".sal", resueltas);
     } else {
         resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo, nthreads);
