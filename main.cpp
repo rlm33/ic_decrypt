@@ -215,6 +215,7 @@ int main(int argc, char** argv) {
             if (i + 1 < argc) {
                 nthreads = atoi(argv[i + 1]);
                 i++;
+                modo_paralelo = true;
             } else {
                 cout << "Falta especificar el numero de hilos tras -n" << endl;
             }
