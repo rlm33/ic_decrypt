@@ -97,9 +97,9 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nth
                 solucion += '0'; //Inicializamos la cadena solución a 'tam' ceros.
             }
             if(parallel){
-                this->expand_parallel(clave, md5, solucion, 0, nthreads);
+                if (this->expand_parallel(clave, md5, solucion, 0, nthreads)) {
                     return solucion;
-              
+                }
             }
             else{
                 if (this->expand(clave, md5, solucion, 0)) {
@@ -168,7 +168,7 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
     string solucionReal = "Solucion no encontrada";
     string aux = "";
     
-    cout << "tenemos " << nthreads << " threads, a " << chunk << " letras cada uno" << endl;
+    cout << "tenemos " << nthreads << " threads, a " << chunk << " letras cada uno de " << dominio.size() << " en total. " << endl;
     
      
         #pragma omp parallel for shared(chunk) private(i,j,aux) schedule(dynamic,chunk)
