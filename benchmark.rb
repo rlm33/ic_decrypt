@@ -1,11 +1,19 @@
 require 'benchmark'
 
-decrypter = "./dist/Debug/GNU-Linux-x86/ic_decrypt"
+$decrypter = "./dist/Debug/GNU-Linux-x86/ic_decrypt"
+$downcase_size = 26
+
+$to_test = "alpha gamma light zoned"
+
+def ic_decrypt args
+	system("#{$decrypter} #{args}")
+end
+
 Benchmark.bm do |x| 
 	puts 'DOWNCASE:'
-	x.report{system("#{decrypter} alfa beta gamma -d downcase")}
-	puts 'ALPHANUMERIC'
-	x.report{system("#{decrypter} alf4 b3ta gaMMa -d alphanumeric")}
-	puts 'COMPLETE'
-	x.report{system("#{decrypter} a:@~ -d complete")}
+	x.report("Simple:") { ic_decrypt($to_test) }
+	x.report("2 threads:") { ic_decrypt("#{$to_test} -p -n 2") }
+	x.report("3 threads:") { ic_decrypt("#{$to_test} -p -n 3") }
+	x.report("4 threads:") { ic_decrypt("#{$to_test} -p -n 4") }
+	x.report("#{$downcase_size} threads:") { ic_decrypt("#{$to_test} -p -n #{$downcase_size}") }
 end
