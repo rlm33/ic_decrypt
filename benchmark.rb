@@ -15,7 +15,7 @@ def benchmark to_test, domain_name, domain_size
 		x.report("2 threads:") { ic_decrypt(to_test, domain_name, 2) }
 		x.report("3 threads:") { ic_decrypt(to_test, domain_name, 3) }
 		x.report("4 threads:") { ic_decrypt(to_test, domain_name, 4) }
-		x.report("#{$domain_size} threads:") { ic_decrypt(to_test, domain_name, domain_size) }
+		x.report("#{domain_size} threads:") { ic_decrypt(to_test, domain_name, domain_size) }
 	end
 end
 
