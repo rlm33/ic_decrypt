@@ -11,9 +11,9 @@ end
 
 Benchmark.bm do |x| 
 	puts 'DOWNCASE:'
-	x.report("Simple:") { ic_decrypt($to_test) }
-	x.report("2 threads:") { ic_decrypt("#{$to_test} -p -n 2") }
-	x.report("3 threads:") { ic_decrypt("#{$to_test} -p -n 3") }
-	x.report("4 threads:") { ic_decrypt("#{$to_test} -p -n 4") }
-	x.report("#{$downcase_size} threads:") { ic_decrypt("#{$to_test} -p -n #{$downcase_size}") }
+	x.report("Simple:\n") { ic_decrypt($to_test) }
+	x.report("2 threads:\n") { ic_decrypt("#{$to_test} -p -n 2") }
+	x.report("3 threads:\n") { ic_decrypt("#{$to_test} -p -n 3") }
+	x.report("4 threads:\n") { ic_decrypt("#{$to_test} -p -n 4") }
+	x.report("#{$downcase_size} threads\n:") { ic_decrypt("#{$to_test} -p -n #{$downcase_size}") }
 end
