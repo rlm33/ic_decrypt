@@ -11,11 +11,11 @@ end
 def benchmark to_test, domain_name, domain_size
 	Benchmark.bm do |x| 
 		puts domain_name
-		x.report("Simple:\n") { ic_decrypt(to_test, domain_name) }
-		x.report("2 threads:\n") { ic_decrypt(to_test, domain_name, 2) }
-		x.report("3 threads:\n") { ic_decrypt(to_test, domain_name, 3) }
-		x.report("4 threads:\n") { ic_decrypt(to_test, domain_name, 4) }
-		x.report("#{$downcase_size} threads\n:") { ic_decrypt(to_test, domain_name, domain_size) }
+		x.report("Simple:") { ic_decrypt(to_test, domain_name) }
+		x.report("2 threads:") { ic_decrypt(to_test, domain_name, 2) }
+		x.report("3 threads:") { ic_decrypt(to_test, domain_name, 3) }
+		x.report("4 threads:") { ic_decrypt(to_test, domain_name, 4) }
+		x.report("#{$downcase_size} threads:") { ic_decrypt(to_test, domain_name, domain_size) }
 	end
 end
 
