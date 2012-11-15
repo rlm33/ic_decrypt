@@ -43,8 +43,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-fpermissive
-CXXFLAGS=-fpermissive
+CCFLAGS=-fpermissive -fopenmp
+CXXFLAGS=-fpermissive -fopenmp
 
 # Fortran Compiler Flags
 FFLAGS=

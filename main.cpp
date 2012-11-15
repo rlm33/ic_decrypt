@@ -9,27 +9,29 @@
 
 using namespace std;
 
-//funcion de encriptaicon md5
+//funcion de encriptacion md5
+
 string encrypt(string cadena) {
     string ret = "";
     MD5 md5;
 
-    ret = md5.digestString(cadena.c_str());     //encriptacion md5
+    ret = md5.digestString(cadena.c_str()); //encriptacion md5
 
     return ret;
 }
 
 //funcion de desencriptacion md5
-string decrypt(string result_md5, string dom = "DOWNCASE", int tam = 8) {
+
+string decrypt(string result_md5, bool modo_paralelo = false, int nthreads = 2, string dom = "DOWNCASE") {
     string ret = "";
     Decrypter decrypter(dom);
-    //decrypter.setTam(tam);
-    ret = decrypter.decrypt(result_md5,tam);
+    ret = decrypter.decrypt(result_md5, -1, modo_paralelo, nthreads);
 
     return ret;
 }
 
 //funcion para leer fichero de texto
+
 vector <string> leerFichero(string fichero) {
 
     fstream ficheroe;
@@ -59,11 +61,12 @@ vector <string> leerFichero(string fichero) {
 }
 
 //funcion para escribir fichero de texto
+
 void escribirFichero(string fichero, vector <string> cadenas) {
 
     fstream ficheroe;
     string nombrefichero = fichero;
-    int i=0;
+    int i = 0;
 
     char nomfichero[nombrefichero.length() - 1];
 
@@ -71,7 +74,7 @@ void escribirFichero(string fichero, vector <string> cadenas) {
     ficheroe.open(nomfichero, ios::out);
 
     if (ficheroe.is_open()) {
-        while (i<cadenas.size()) {
+        while (i < cadenas.size()) {
             ficheroe << cadenas[i] << endl; //escribo y borro elemento
             i++;
         }
@@ -81,11 +84,21 @@ void escribirFichero(string fichero, vector <string> cadenas) {
 }
 
 //funcion para modo interactivo
+
 void interactivo() {
-    string menu = "1- Encrypt\n2- Decrypt\n99- Salir";
-    string cadena = "";
-    int opcion = 0;
+    string menu = "1- Encrypt\n2- Decrypt\n3- Change domain\n4- Activate parallel\n5- Deactivate parallel\n99- Salir";
+    string cadena = "", domain = "DOWNCASE";
+    bool modo_paralelo = false;
+    int ntrheads = 2; //2 hilos por defecto
+    int opcion = 0, dom = 0;
     while (opcion != 99) {
+        system("clear");
+        if (opcion == 1) {
+                cout << "Encriptacion MD5 = " << cadena << endl << endl;
+        }
+        else if (opcion == 2) {
+            cout << "Cadena original = " << cadena << endl << endl;
+        }
         cout << menu << endl;
         getline(cin, cadena);
         opcion = atoi(cadena.c_str());
@@ -93,12 +106,41 @@ void interactivo() {
             case 1:
                 cout << "Cadena a encriptar: ";
                 getline(cin, cadena);
-                cout << "Encriptacion MD5 = " << encrypt(cadena) << endl;
+                cadena = encrypt(cadena);
+                cout << "Encriptacion MD5 = " << cadena << endl;
                 break;
             case 2:
                 cout << "Cadena MD5 a desencriptar: ";
                 getline(cin, cadena);
-                cout << "Cadena original = " << decrypt(cadena) << endl;
+                cadena = decrypt(cadena, modo_paralelo, ntrheads, domain);
+                cout << "Cadena original = " << cadena << endl;
+                break;
+            case 3:
+                cout << "1- DOWNCASE\n2- ALPHANUMERIC\n3- COMPLETE ASCII" << endl;
+                getline(cin, cadena);
+                dom = atoi(cadena.c_str());
+                switch (dom) {
+                    case 1:
+                        domain = "DOWNCASE";
+                        break;
+                    case 2:
+                        domain = "ALPHANUMERIC";
+                        break;
+                    case 3:
+                        domain = "COMPLETE";
+                        break;
+                    default:
+                        cout << "Wrong option, last domain " << domain << endl;
+                }
+                break;
+            case 4:
+                modo_paralelo = true;
+                cout << "Numero de hilos a utilizar: ";
+                getline(cin, cadena);
+                ntrheads = atoi(cadena.c_str());
+                break;
+            case 5:
+                modo_paralelo = false;
                 break;
             case 99:
                 cout << endl << "Bye bye..." << endl << endl;
@@ -110,7 +152,8 @@ void interactivo() {
 }
 
 //funcion para resolver las cadenas en md5
-vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio) {
+
+vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio, bool modo_paralelo = false, int nthreads = 2) {
     MD5 md5;
     string cadena, result_md5, solucion;
     vector <string> resueltas;
@@ -120,13 +163,10 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
         //decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
-        solucion = decrypter.decrypt(result_md5,cadena.length(),true);  //booleano para usar paralelismo
-        if(solucion == "Solucion no encontrada")
-        {
+        solucion = decrypter.decrypt(result_md5, cadena.length(), modo_paralelo, nthreads); //booleano para usar paralelismo
+        if (solucion == "Solucion no encontrada") {
             cout << solucion << " para cadena " << cadena << endl;
-        }
-        else
-        {
+        } else {
             cout << "Solucion encontrada: " << solucion;
             if (solucion == cadena) {
                 resueltas.push_back("cadena encriptada: " + result_md5 + " cadena original: " + solucion);
@@ -136,7 +176,7 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
             }
         }
     }
-    
+
     return resueltas;
 }
 
@@ -144,16 +184,17 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
  * cuerpo principal
  */
 int main(int argc, char** argv) {
-    bool modo_interactivo = false, modo_fichero = false; //opciones
+    bool modo_interactivo = false, modo_fichero = false, modo_paralelo = false; //opciones
+    int nthreads = 2; //2 hilos por defecto
     string fichero_a_desencriptar = "";
     string dominio_activo = "DOWNCASE";
     vector<string> cadenas_a_resolver;
-    
+
     //Procesar opciones:
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-i") == 0) {
             modo_interactivo = true;
-        } else if (strcmp(argv[i], "-f") == 0) {        //seleccion de modo fichero
+        } else if (strcmp(argv[i], "-f") == 0) { //seleccion de modo fichero
             if (i + 1 < argc) {
                 modo_fichero = true;
                 fichero_a_desencriptar = argv[i + 1];
@@ -161,27 +202,35 @@ int main(int argc, char** argv) {
             } else {
                 cout << "Falta especificar el fichero tras -f" << endl;
             }
-        } else if (strcmp(argv[i], "-d") == 0) {        //seleccion de modo activo
+        } else if (strcmp(argv[i], "-d") == 0) { //seleccion de modo activo
             if (i + 1 < argc) {
                 dominio_activo = argv[i + 1];
                 i++;
             } else {
                 cout << "Falta especificar el tipo de dominio tras -d" << endl;
             }
-        } 
-        else {
+        } else if (strcmp(argv[i], "-p") == 0) {
+            modo_paralelo = true;
+        } else if (strcmp(argv[i], "-n") == 0) {
+            if (i + 1 < argc) {
+                nthreads = atoi(argv[i + 1]);
+                i++;
+            } else {
+                cout << "Falta especificar el numero de hilos tras -n" << endl;
+            }
+        } else {
             cadenas_a_resolver.push_back(argv[i]);
         }
     }
-    if (modo_interactivo) {     //modo interactivo
+    if (modo_interactivo) { //modo interactivo
         interactivo();
-    } else if (modo_fichero) {  //ejecucion de mdo fichero
+    } else if (modo_fichero) { //ejecucion de modo fichero
         vector <string> resueltas;
         cadenas_a_resolver = leerFichero(fichero_a_desencriptar);
-        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo);
-        escribirFichero(fichero_a_desencriptar + ".sal", resueltas);        
+        resueltas = resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo);
+        escribirFichero(fichero_a_desencriptar + ".sal", resueltas);
     } else {
-        resolver_cadenas(cadenas_a_resolver, dominio_activo);
+        resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo, nthreads);
     }
 
     return 0;

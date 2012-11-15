@@ -19,7 +19,7 @@ private:
     //Método para llamada recursiva de 'decrypt'.
     //Devuelve true si encuentra solución y false en caso contrario.
     bool expand(string clave, MD5 md5, string &solucion, int k);
-    bool expand_parallel(string clave, MD5 md5, string &solucion, int k);
+    bool expand_parallel(string clave, MD5 md5, string &solucion, int k, int nthreads = 2);
     
 public:
     //Constructor por defecto, dominio = minúsculas y tam = 4
@@ -45,7 +45,7 @@ public:
     //Devuelve la cadena original o la cadena "Solucion no encontrada" si no consigue
     //desencriptar bajo el dominio activo y/o no coincide tam_original con el tamaño
     //de la cadena desencriptada.
-    string decrypt(string clave,int tam_original=-1, bool parallel = false);
+    string decrypt(string clave, int tam_original=-1, bool parallel = false, int nthreads = 2);
 };
 
 #endif	/* DECRYPTER_H */
