@@ -161,6 +161,9 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
     int chunk;
     //int nthreads = 2;
     chunk = dominio.size()/nthreads;
+    if (dominio.size()%nthreads != 0) {
+        chunk++; //Por si no es multiplo del numero de threads
+    }
     bool encontrada = false;
     string solucionReal = "Solucion no encontrada";
     string aux = "";
