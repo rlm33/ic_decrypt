@@ -2,7 +2,7 @@ require 'benchmark'
 
 $decrypter = "./dist/Debug/GNU-Linux-x86/ic_decrypt"
 
-$to_test = %w{alpha gamma light zoned}
+$to_test = %w{alpha gamma light pulse zoned}
 
 def ic_decrypt to_test, domain, numthreads=nil
 	system("#{$decrypter} #{to_test} -d #{domain} #{"-p -n #{numthreads}" if numthreads} > log_benchmark.txt")
