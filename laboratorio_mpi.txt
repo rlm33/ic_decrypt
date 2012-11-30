@@ -1,0 +1,18 @@
+=== MPI LABORATORIO ===
+
+Lenguaje C estándar
+
+Supercomputador en anillo
+
+Crear fichero en $HOME (indicar ruta fichero configuración) "mpd.hosts" => [nombre computador|ip] slots = n
+
+Lanzar demonio "mpd" en todos los equipos del anillo => mpd.boot -n numero_equipos -f fichero_hosts -r rsh
+
+Mismo user en todos los equipos
+
+Comprobar si anillo activo "mpdtrace -l"
+
+Cerrar el anillo "mpdallexit"
+
+Lanzar aplicación "mpdiexec -n numero_procesos"
+
