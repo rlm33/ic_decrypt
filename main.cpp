@@ -197,7 +197,12 @@ int main(int argc, char** argv) {
 
     //Procesar opciones:
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-i") == 0) {
+        if (strcmp(argv[i], "-np") == 0) {
+            if (i + 1 < argc) {
+                i++;
+            }
+        }
+        else if (strcmp(argv[i], "-i") == 0) {
             modo_interactivo = true;
         } else if (strcmp(argv[i], "-f") == 0) { //seleccion de modo fichero
             if (i + 1 < argc) {
