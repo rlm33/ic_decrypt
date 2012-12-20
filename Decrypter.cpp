@@ -82,7 +82,7 @@ void Decrypter::setTam(int tam) {
     this->tam = tam;
 }
 
-string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nthreads) {
+string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nthreads, bool mpi, int me, int nprocs) {
     MD5 md5;
     string solucion = "";
     int i, j;
@@ -96,7 +96,12 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nth
             for (i = 0; i<this->tam; i++) {
                 solucion += '0'; //Inicializamos la cadena solución a 'tam' ceros.
             }
-            if(parallel){
+            if (mpi) {
+                if (this->expand_mpi(clave, md5, solucion, 0, me, nprocs)) {
+                    return solucion;
+                }
+            }
+            else if(parallel){
                 if (this->expand_parallel(clave, md5, solucion, 0, nthreads)) {
                     return solucion;
                 }
@@ -118,18 +123,22 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nth
         for (i = 0; i<this->tam; i++) {
             solucion += '0';
         }
-        if(parallel){
-                this->expand_parallel(clave, md5, solucion, 0, nthreads);
-                    return solucion;
-                
+        if (mpi) {
+            if (this->expand_mpi(clave, md5, solucion, 0, me, nprocs)) {
+                return solucion;
             }
-            else{
-                if (this->expand(clave, md5, solucion, 0)) {
-                    return solucion;
-                } else {
-                    return "Solucion no encontrada";
-                }
+        }
+        else if(parallel) {
+            this->expand_parallel(clave, md5, solucion, 0, nthreads);
+                return solucion;
+        }
+        else{
+            if (this->expand(clave, md5, solucion, 0)) {
+                return solucion;
+            } else {
+                return "Solucion no encontrada";
             }
+        }
     }
 }
 
@@ -199,6 +208,48 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
                         }
                     }
                 }
+    
+    solucion = solucionReal;
+    //Ninguna solución encontrada para este dominio y este tamaño de cadena.
+    return encontrada;
+}
+
+bool Decrypter::expand_mpi(string clave, MD5 md5, string &solucion, int k, int me, int nprocs) {
+    int i,j;
+    bool encontrada = false;
+    string solucionReal = "Solucion no encontrada";
+    string aux = "";
+    
+    cout << "Init MPI" << endl;
+    
+    for (i = me; i < this->dominio.size(); i+=nprocs) {
+        aux = "";
+        for (j = 0; j<this->tam && aux.length()<this->tam; j++) {
+            aux += '0'; //Inicializamos la cadena solución a 'tam' ceros.
+        }
+        aux[k] = this->dominio[i];
+        //Si ya es el último caracter de la cadena.
+        if (k == this->tam - 1) {
+            //cout << aux << endl; //Mostrar solución intermedia (DEBUG).
+            //Solución correcta comparada con su encriptación MD5.
+            if (clave == md5.digestString(aux.c_str())) {
+                encontrada = true;
+                solucionReal = aux;
+                cout << "Yo gano: P-" << me << endl;
+                this->continue_parallel = false;
+                i = this->tam;
+            }
+        } else {
+            //Llamada recursiva para la siguiente posición de la cadena.
+            if (expand(clave, md5, aux, k + 1)) {
+                encontrada = true;
+                solucionReal = aux;
+                cout << "Yo gano: P-" << me << endl;
+                this->continue_parallel = false;
+                i = this->tam;
+            }
+        }
+    }
     
     solucion = solucionReal;
     //Ninguna solución encontrada para este dominio y este tamaño de cadena.

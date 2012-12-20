@@ -153,7 +153,7 @@ void interactivo() {
 
 //funcion para resolver las cadenas en md5
 
-vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio, bool modo_paralelo = false, int nthreads = 2) {
+vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio, bool modo_paralelo = false, int nthreads = 2, bool modo_mpi = false, int me = 0, int nprocs = 0) {
     MD5 md5;
     string cadena, result_md5, solucion;
     vector <string> resueltas;
@@ -163,7 +163,7 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
         //decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
-        solucion = decrypter.decrypt(result_md5, cadena.length(), modo_paralelo, nthreads); //booleano para usar paralelismo
+        solucion = decrypter.decrypt(result_md5, cadena.length(), modo_paralelo, nthreads, modo_mpi, me, nprocs); //booleano para usar paralelismo o mpi
         if (solucion == "Solucion no encontrada") {
             cout << solucion << " para cadena " << cadena << endl;
         } else {
@@ -184,7 +184,12 @@ vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string domin
  * cuerpo principal
  */
 int main(int argc, char** argv) {
-    bool modo_interactivo = false, modo_fichero = false, modo_paralelo = false; //opciones
+    //opciones
+    bool modo_interactivo = false;
+    bool modo_fichero = false;
+    bool modo_paralelo = false;
+    bool modo_mpi = false;
+    
     int nthreads = 2; //2 hilos por defecto
     string fichero_a_desencriptar = "";
     string dominio_activo = "DOWNCASE";
@@ -219,11 +224,23 @@ int main(int argc, char** argv) {
             } else {
                 cout << "Falta especificar el numero de hilos tras -n" << endl;
             }
+        } else if (strcmp(argv[i], "-mpi") == 0) {
+            modo_mpi = true;
         } else {
             cadenas_a_resolver.push_back(argv[i]);
         }
     }
-    if (modo_interactivo) { //modo interactivo
+    if (modo_mpi) {
+        int me, nprocs;
+        MPI_Init(&argc, &argv);
+        MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+        MPI_Comm_rank(MPI_COMM_WORLD, &me);
+        
+        resolver_cadenas(cadenas_a_resolver, dominio_activo, false, 0, modo_mpi, me, nprocs);
+        
+        MPI_Finalize();
+    }
+    else if (modo_interactivo) { //modo interactivo
         interactivo();
     } else if (modo_fichero) { //ejecucion de modo fichero
         vector <string> resueltas;
@@ -233,7 +250,7 @@ int main(int argc, char** argv) {
     } else {
         resolver_cadenas(cadenas_a_resolver, dominio_activo, modo_paralelo, nthreads);
     }
-
+    
     return 0;
 }
 
