@@ -1,0 +1,6 @@
+main: Decrypter.o
+	mpicxx main.cpp Decrypter.o -fpermissive -fopenmp -o decrypter
+
+Decrypter.o:
+	mpicxx -c Decrypter.cpp -fpermissive -fopenmp
+
