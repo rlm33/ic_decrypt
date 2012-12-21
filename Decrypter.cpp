@@ -52,6 +52,7 @@ vector<char> Decrypter::build_complete() {
 Decrypter::Decrypter() {
     this->dominio = build_downcase();
     this->tam = 4;
+    this->rank_solver = -1;
 }
 
 Decrypter::Decrypter(string tipo_dominio) {
@@ -82,12 +83,16 @@ void Decrypter::setTam(int tam) {
     this->tam = tam;
 }
 
+int Decrypter::getRankSolver() {
+    return this->rank_solver;
+}
+
 string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nthreads, bool mpi, int me, int nprocs) {
     MD5 md5;
     string solucion = "";
     int i, j;
-    this->continue_parallel = true;
-    
+    this->continue_parallel = nprocs;
+    this->rank_solver = -1;
     //Por defecto, tam_original es menor que 0, por lo que realizamos todas las cadenas
     //desde tamaño 1 hasta 8 caracteres.
     if (tam_original <= 0) {
@@ -97,9 +102,8 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nth
                 solucion += '0'; //Inicializamos la cadena solución a 'tam' ceros.
             }
             if (mpi) {
-                if (this->expand_mpi(clave, md5, solucion, 0, me, nprocs)) {
-                    return solucion;
-                }
+                this->rank_solver = this->expand_mpi(clave, md5, solucion, 0, me, nprocs);
+                return solucion;
             }
             else if(parallel){
                 if (this->expand_parallel(clave, md5, solucion, 0, nthreads)) {
@@ -124,9 +128,9 @@ string Decrypter::decrypt(string clave, int tam_original, bool parallel, int nth
             solucion += '0';
         }
         if (mpi) {
-            if (this->expand_mpi(clave, md5, solucion, 0, me, nprocs)) {
-                return solucion;
-            }
+            //cout << "MPI con continue = " << this->continue_parallel << endl;
+            this->rank_solver = this->expand_mpi(clave, md5, solucion, 0, me, nprocs);
+            return solucion;
         }
         else if(parallel) {
             this->expand_parallel(clave, md5, solucion, 0, nthreads);
@@ -195,7 +199,7 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
                         if (clave == md5.digestString(aux.c_str())) {
                             encontrada = true;
                             solucionReal = aux;
-                            this->continue_parallel = false;
+                            this->continue_parallel = 0;
                             i = this->tam;
                         }
                     } else {
@@ -203,7 +207,7 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
                         if (expand(clave, md5, aux, k + 1)) {
                             encontrada = true;
                             solucionReal = aux;
-                            this->continue_parallel = false;
+                            this->continue_parallel = 0;
                             i = this->tam;
                         }
                     }
@@ -214,44 +218,32 @@ bool Decrypter::expand_parallel(string clave, MD5 md5, string &solucion, int k, 
     return encontrada;
 }
 
-bool Decrypter::expand_mpi(string clave, MD5 md5, string &solucion, int k, int me, int nprocs) {
-    int i,j;
-    bool encontrada = false;
-    string solucionReal = "Solucion no encontrada";
-    string aux = "";
-    
-    cout << "Init MPI" << endl;
-    
+int Decrypter::expand_mpi(string clave, MD5 md5, string &solucion, int k, int me, int nprocs) {
+    int i,sum,rank_solver=-1;
+    //Para cada caracter del dominio.
     for (i = me; i < this->dominio.size(); i+=nprocs) {
-        aux = "";
-        for (j = 0; j<this->tam && aux.length()<this->tam; j++) {
-            aux += '0'; //Inicializamos la cadena solución a 'tam' ceros.
+        MPI_Allreduce (&this->continue_parallel, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+        if (sum < nprocs*nprocs) { //Si la suma es menor que el cuadrado de nprocs
+            rank_solver = nprocs - (nprocs*nprocs - sum); //El resolutor es rank_solver
+            break; //Y salimos.
         }
-        aux[k] = this->dominio[i];
+        solucion[k] = this->dominio[i];
         //Si ya es el último caracter de la cadena.
         if (k == this->tam - 1) {
-            //cout << aux << endl; //Mostrar solución intermedia (DEBUG).
+            //cout << solucion << endl; //Mostrar solución intermedia (DEBUG).
             //Solución correcta comparada con su encriptación MD5.
-            if (clave == md5.digestString(aux.c_str())) {
-                encontrada = true;
-                solucionReal = aux;
-                cout << "Yo gano: P-" << me << endl;
-                this->continue_parallel = false;
-                i = this->tam;
+            if (clave == md5.digestString(solucion.c_str())) {
+                this->continue_parallel = me;
+                rank_solver = me;
             }
         } else {
             //Llamada recursiva para la siguiente posición de la cadena.
-            if (expand(clave, md5, aux, k + 1)) {
-                encontrada = true;
-                solucionReal = aux;
-                cout << "Yo gano: P-" << me << endl;
-                this->continue_parallel = false;
-                i = this->tam;
+            if(expand(clave, md5, solucion, k + 1)) {
+                this->continue_parallel = me;
+                rank_solver = me;
             }
         }
     }
     
-    solucion = solucionReal;
-    //Ninguna solución encontrada para este dominio y este tamaño de cadena.
-    return encontrada;
+    return rank_solver;
 }

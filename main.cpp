@@ -153,18 +153,27 @@ void interactivo() {
 
 //funcion para resolver las cadenas en md5
 
-vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio, bool modo_paralelo = false, int nthreads = 2, bool modo_mpi = false, int me = 0, int nprocs = 0) {
+vector <string> resolver_cadenas(vector<string> cadenas_a_resolver, string dominio, bool modo_paralelo = false, int nthreads = 2, bool modo_mpi = false, int me = 0, int nprocs = 1) {
     MD5 md5;
     string cadena, result_md5, solucion;
     vector <string> resueltas;
     Decrypter decrypter(dominio);
     for (int i = 0; i < cadenas_a_resolver.size(); i++) {
         cadena = cadenas_a_resolver[i];
+        //cout << "Comenzando con " << cadena << " ..." << endl;
         //decrypter.setTam(cadena.length());
         solucion = "";
         result_md5 = md5.digestString(cadena.c_str());
+        int rank_solver = -1;
         solucion = decrypter.decrypt(result_md5, cadena.length(), modo_paralelo, nthreads, modo_mpi, me, nprocs); //booleano para usar paralelismo o mpi
-        if (solucion == "Solucion no encontrada") {
+        if (modo_mpi) {
+            rank_solver = decrypter.getRankSolver();
+            if (me == rank_solver) {
+                cout << "Resuelta " << cadena << " por P-" << me << endl;
+            } else if (rank_solver == -1 && me == 0) {
+                cout << "MPI: Solucion no encontrada para cadena " << cadena << endl;
+            }
+        } else if (solucion == "Solucion no encontrada") {
             cout << solucion << " para cadena " << cadena << endl;
         } else {
             cout << "Solucion encontrada: " << solucion;
@@ -240,9 +249,8 @@ int main(int argc, char** argv) {
         MPI_Init(&argc, &argv);
         MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
         MPI_Comm_rank(MPI_COMM_WORLD, &me);
-        
+        //cout << nprocs << endl;
         resolver_cadenas(cadenas_a_resolver, dominio_activo, false, 0, modo_mpi, me, nprocs);
-        
         MPI_Finalize();
     }
     else if (modo_interactivo) { //modo interactivo
