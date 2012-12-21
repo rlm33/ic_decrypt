@@ -1,0 +1,15 @@
+DOWNCASE for alpha
+       user     system      total        real
+MPI:  0.000000   0.000000   3.380000 (  3.192481)
+DOWNCASE for gamma
+       user     system      total        real
+MPI:  0.000000   0.000000   0.660000 (  2.182514)
+DOWNCASE for light
+       user     system      total        real
+MPI:  0.000000   0.000000  10.060000 (  5.261833)
+DOWNCASE for pulse
+       user     system      total        real
+MPI:  0.000000   0.000000  20.300000 (  8.836320)
+DOWNCASE for zoned
+       user     system      total        real
+MPI:  0.000000   0.000000  20.020000 (  8.704128)
